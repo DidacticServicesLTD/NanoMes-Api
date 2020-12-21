@@ -1,0 +1,72 @@
+{
+  "schemas" : [
+    {
+      "name" : "courses",
+      "version" : 0.1,
+      "schema" : [
+        {
+          "name" : "example_bool",
+          "type" : "bool"
+        },
+        {
+          "name" : "example_int",
+          "type" : "int"
+        },
+        {
+          "name" : "example_var",
+          "type" : "string"
+        },
+        {
+          "name" : "example_arr",
+          "type" : "array_of_strings"
+        },
+        {
+          "name" : "example_repeat",
+          "type" : "repeat",
+          "schema_info" : {
+            "name" : "slides",
+            "version" : 0.1
+          }
+        }
+      ]
+    },
+    {
+      "name" : "slides",
+      "version" : 0.1,
+      "schema" : [
+        {
+          "name" : "example_var_1",
+          "type" : "string"
+        },
+        {
+          "name" : "example_var_2",
+          "type" : "string"
+        }
+      ]
+    },
+    {
+      "name" : "users",
+      "version" : 0.1
+    }
+  ],
+  "documents" : [
+    {
+      "id" : "jsd438hdobeoha0xhwoebx0u2b3",
+      "schema_info" : {
+        "name" : "courses",
+        "version" : 0.1
+      },
+      "data" : {
+        "example_bool" : true,
+        "example_int" : false,
+        "example_var" : "example text string",
+        "example_arr" : [
+          "example",
+          "array",
+          "of",
+          "strings"
+        ]
+      }
+    }
+  ]
+}
