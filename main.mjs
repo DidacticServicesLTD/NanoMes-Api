@@ -1,35 +1,48 @@
-// Parameters 
-let _global = {
-  site : {
-    title : "Boleyn_api",
-    tagline : "The Headless CMS API",
-    version : 0.1,
-    docs : 'http://boleyn.io/docs'
-  },
-  author : {
-    name : "Calum Knott",
-    first_name : "Calum",
-    last_name : "Knott",
-    email : "calum@calumk.com"
-  }
-};
-
+import { _global } from './private/_global.mjs';
 
 // node-modules
 import { App } from '@tinyhttp/app'
 
+import nodeCleanup from 'node-cleanup'
+ 
+
+
 // custom modules
-import {routes as routes_api_v1} from './private/routes/api_v1.mjs';
+import {api as http_api_v1} from './private/routes/http_api_v1.mjs';
+import {api as udp_api_v1} from './private/routes/udp_api_v1.mjs';
 
 const app = new App()
+
+
 
 app.get('/',  async (req, res) => {
   res.send(_global)
 });
 
-w
+app.use('/api/v1',http_api_v1)
+app.listen(1338, () => console.log(`HTTP is listening on : 1338`))
 
 
-app.use('/api/v1',routes_api_v1)
+app.use(udp_api_v1)
+udp_api_v1.on('listening', () => { console.log(`UDP is listening on : 1339` )})
 
-app.listen(1338, () => console.log(`Listening on http://localhost:1338`))
+
+
+nodeCleanup(function (exitCode, signal) {
+  // release resources here before node exits
+  console.log(" ")
+  console.log("Closing!")
+  console.log(" ")
+  console.log("Closing UDP Server")
+  console.log(" ")
+  udp_api_v1.close()
+  console.log(" ")
+  console.log("Closing HTTP Server")
+  console.log(" ")
+  console.log(" ")
+  console.log(" ")
+  console.log(" ")
+  console.log("Goodbye")
+  console.log(" ")
+
+});

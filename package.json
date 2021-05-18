@@ -1,21 +1,29 @@
 {
-  "name": "dsle_v2",
+  "name": "nanomes_api",
   "version": "1.0.0",
-  "description": "",
+  "description": "The nanomes API",
   "main": "main.mjs",
   "scripts": {
     "start": "node main.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "launch": "nodemon"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@tinyhttp/app": "^1.0.13",
+    "@tinyhttp/cookie-parser": "^1.1.12",
+    "@tinyhttp/cors": "^1.1.2",
+    "dgram": "^1.0.1",
+    "jsonwebtoken": "^8.5.1",
     "milliparsec": "^1.0.4",
+    "node-cleanup": "^2.1.2",
     "path": "^0.12.7",
-    "sql.js": "^1.4.0",
+    "ping": "^0.4.1",
+    "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.0.0",
-    "trilogy": "^2.0.3"
+    "typeorm": "^0.2.29",
+    "uuid": "^8.3.2"
   },
   "engines": {
     "node": "14.15.1"
