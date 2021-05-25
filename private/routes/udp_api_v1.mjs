@@ -78,7 +78,7 @@ function hasAllProperties(obj, props) {
       
       try{
         if(!hasAllProperties(msg_json,["msg"])){
-          throw "missing properties"
+          throw "missingProperties"
         }
 
         response += `#error=false`
@@ -89,6 +89,45 @@ function hasAllProperties(obj, props) {
         response += `#error_msg=${err}`
       }
     }
+
+
+// _                    
+// | |    ___   __ _ ___ 
+// | |   / _ \ / _` / __|
+// | |__| (_) | (_| \__ \
+// |_____\___/ \__, |___/
+//             |___/     
+
+
+
+if (msg_json.command == "logMessage") {
+  try{
+    if(!hasAllProperties(msg_json,['station_uuid','msg'])){
+      throw "missingProperties"
+    }
+
+    if(!msg_json.hasOwnProperty('status')){
+      msg_json.status = -1
+    }
+
+    var props = {
+      stationUuid : msg_json.station_uuid,
+      msg : {msg  : msg_json.msg },
+      time : Date.now(),
+      status : msg_json.status
+    }
+    
+    await _database._Logs.save(props);
+
+    response += `#error=false`
+
+  }catch(err){
+    response += `#error=true`
+    response += `#error_msg=${err}`
+  }
+
+}
+
 
 
 
@@ -107,7 +146,7 @@ function hasAllProperties(obj, props) {
       try{
 
         if(!hasAllProperties(msg_json,["station_uuid"])){
-          throw "missing properties"
+          throw "missingProperties"
         }
 
         let station = await _database._Stations.findOne({ where : {uuid : msg_json.station_uuid }, relations: ['Operation']})
@@ -136,13 +175,112 @@ function hasAllProperties(obj, props) {
       try{
 
         if(!hasAllProperties(msg_json,["order_uuid", "rfid_id"])){
-          throw "missing properties"
+          throw "missingProperties"
         }
 
         let order = await _database._Orders.findOne({uuid : msg_json.order_uuid});
         order.rfid_id = msg_json.rfid_id
         await _database._Orders.save(order);
         response += `#error=false`
+
+      }catch(err){
+        response += `#error=true`
+        response += `#error_msg=${err}`
+      }
+    }
+
+
+
+
+        // sets rfid data
+    // requires : "station_uuid"
+    if (msg_json.command == "setStepStatusForOrderUuidAndStepUuid") {
+      try{
+
+        if(!hasAllProperties(msg_json,["order_uuid","step_status", "step_uuid"])){
+          throw "missingProperties"
+        }
+
+        let order = await _database._Orders.findOne({uuid : msg_json.order_uuid});
+
+        // find the corisponding step, and update the status
+        order.product_instance.sequence.every(step =>{
+          if(step.uuid == msg_json.step_uuid){
+            step.status = msg_json.step_status
+            console.log("updating status of " + step.uuid + " to " + msg_json.step_status)
+            return false
+          }
+          return true
+        })
+
+
+
+        // now we need to loop through, and check if all step status = 100.
+        // if they do, we can update the order status to 100 too, to indaicate it is complete.
+        // 
+        var all100 = true
+        order.product_instance.sequence.every(step =>{
+          if(step.status == 100){
+            return false
+          }else{
+            all100 = false;
+            return true
+          }
+        })
+        if(all100){
+          order.status = 100;
+        }
+
+
+        await _database._Orders.save(order);
+
+
+
+
+
+
+
+
+        response += `#error=false`
+
+      }catch(err){
+        response += `#error=true`
+        response += `#error_msg=${err}`
+      }
+    }
+
+
+
+    // get rfid 
+    // requires : "station_uuid"
+    if (msg_json.command == "getNextOperationForRfid") {
+      try{
+
+        if(!hasAllProperties(msg_json,["rfid_id"])){
+          throw "missingProperties"
+        }
+
+        let order = await _database._Orders.findOne({rfid_id : msg_json.rfid_id});
+
+        response += `#order_uuid=${order.uuid}`
+        // response += `#rfid_id=${order.rfid_id}`
+ 
+        console.log(order.product_instance.sequence)
+        order.product_instance.sequence.every(step => {
+          if(step.status == 0){
+
+            response += `#station_uuid=${step.station}`
+            response += `#step_uuid=${step.uuid}`
+            response += `#operation_uuid=${step.operation}`
+            response += `#parameter=${step.parameter}`
+
+            response += `#error=false`
+            return false
+          }
+          return true
+        });
+
+
 
       }catch(err){
         response += `#error=true`
@@ -204,13 +342,30 @@ function hasAllProperties(obj, props) {
       let orders = await _database._Orders.find()
 
       try{
-        if( orders[0].product_instance.sequence[0].station == msg_json.station_uuid ){
 
-                let step = orders[0].product_instance.sequence[0];
-                //EG:  #station_name=Distribution#station_ipaddress=172.21.0.1#station_status=1
-                response += "#error=false"
-                response += `#order_uuid=${orders[0].uuid}#operation=${step.operation}#parameter=${step.parameter}` 
+        if(orders.length == 0){
+          throw("NoOrderAvaliable");
         }
+
+        var found = false
+        orders.every(order => {
+          if(order.product_instance.sequence[0].station == msg_json.station_uuid){
+
+            if(order.product_instance.sequence[0].status == 0){
+              response += "#error=false"
+              response += `#order_uuid=${order.uuid}` // #operation=${step.operation}#parameter=${step.parameter} 
+              found = true;
+              return false
+            }
+          }
+          return true
+        });
+
+        if(!found){
+          throw("NotFound")
+        }
+
+
       }catch(err){
         response += `#error=true`
         response += `#error_msg=${err}`
@@ -240,12 +395,12 @@ function hasAllProperties(obj, props) {
     response += `#time=${Date.now()}`;
     // response = response + `#a=b`;
 
-    api.send(response ,'1340', info.address, function(error){
+    api.send(response ,info.port, info.address, function(error){
       if(error){
         client.close();
       }else{
 
-        console.log('Data sent to :  '+ info.address + " : " + '1340' + " ---- " + response);
+        console.log('Data sent to :  '+ info.address + " : " + '1339' + " ---- " + response);
       }
 
     });

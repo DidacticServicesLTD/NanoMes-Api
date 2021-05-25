@@ -19,6 +19,10 @@ app.get('/',  async (req, res) => {
   res.send(_global)
 });
 
+app.get('/*',  async (req, res) => {
+  res.status(404).end('Not Found')
+});
+
 app.use('/api/v1',http_api_v1)
 app.listen(1338, () => console.log(`HTTP is listening on : 1338`))
 

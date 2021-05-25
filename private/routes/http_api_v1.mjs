@@ -475,17 +475,25 @@ api.get('/products/:uuid', async (req, res) => {
  * @returns {json} 
  */
 api.post('/products', async (req, res) => {
-  
+   
   console.log("updating or creating operation")
   console.log(req.body)
   if(!(req.body.name && req.body.description)){
     res.send({name : "missingProperties", message : "One or more property not set"});
+    console.log({name : "missingProperties", message : "One or more property not set"})
     return
+  }
+
+
+  if(!req.body.hasOwnProperty("sequence")){
+    req.body.sequence = [];
   }
 
   if( req.body.sequence.length == 0){
     req.body.sequence = [{"station":"13e516d5-b496-4503-a55a-453d4daecfe5","operation":"371ff7e4-3b3b-4657-ba77-2bbd22b9ffc2","parameter":1}]
   }
+
+
 
 
   var props = {
@@ -610,6 +618,7 @@ api.post('/orders', async (req, res) => {
   console.log(product)
   product.sequence.forEach(step => {
     step.status = 0
+    step.uuid = uuidv4()
   });
   
   console.log(product)
@@ -627,15 +636,19 @@ api.post('/orders', async (req, res) => {
 });
 
 
+
+
+
+
 /**
- * /operations
- * Delete a specific operation
+ * /orders
+ * Delete a specific order
  * @type {delete}
  * @access read, write
  * @returns {json} 
  */
  api.delete('/orders', async (req, res) => {
-  console.log("Deleteing operation")
+  console.log("Deleteing order")
   console.log(req.body)
   if(!req.body.uuid){
     res.send({name : "missingProperties", message : "One or more property not set"});
@@ -648,6 +661,126 @@ api.post('/orders', async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+// _                    
+// | |    ___   __ _ ___ 
+// | |   / _ \ / _` / __|
+// | |__| (_) | (_| \__ \
+// |_____\___/ \__, |___/
+//             |___/     
+
+
+
+/**
+ * /logs
+ * supplies a list of all operations
+ * @type {get}
+ * @access read
+ * @returns {text} 
+ */
+ api.get('/logs', async (req, res) => {
+  let query = await _database._Logs.find({relations: ['Station']})
+  query = query.reverse()
+  res.send(query);
+  // res.send("hello")
+});
+
+
+
+/**
+ * /orders/:uuid
+ * supplies a list of all Products
+ * @type {get}
+ * @access read
+ * @param {string} uuid The slug
+ * @returns {json} 
+ */
+api.get('/logs/:uuid', async (req, res) => {
+  // let find = req.params.templateRef.length > 20  ? {id : req.params.templateRef} : {slug : req.params.templateRef}
+  console.log(req.params.uuid)
+  try{
+    let query = await _database._logs.findOne({uuid : req.params.uuid})
+    res.send(query);
+  }
+  catch{
+    res.send({})
+  }
+});
+
+
+
+
+/**
+ * /logs
+ * Add a new operation, or update an existing one
+ * @type {post}
+ * @access read, write
+ * @returns {json} 
+ */
+api.post('/logs', async (req, res) => {
+  console.log("updating or creating order")
+  console.log(req.body)
+  if(!(req.body.uuid)){
+    res.send({name : "missingProperties", message : "One or more property not set"});
+    return
+  }
+
+
+  // var props = {
+  //   product_instance : product,
+  //   time : Date.now(),
+  //   status : 0
+  // }
+  
+
+  // await _database._Orders.save(props);
+  // res.send({name : "success", message : "succsessfully updated or created", data : props});
+  res.send({name : "missingCode", message : "Not written"});
+});
+
+
+/**
+ * /logs
+ * Delete a specific operation
+ * @type {delete}
+ * @access read, write
+ * @returns {json} 
+ */
+ api.delete('/logs_all', async (req, res) => {
+  console.log("Deleting all logs")
+  let query = await _database._Logs.delete(true);
+  res.send({name : "success", message : "succsessfully deleted all logs"});
+});
+
+
+
+/**
+ * /orders
+ * Delete a specific order
+ * @type {delete}
+ * @access read, write
+ * @returns {json} 
+ */
+ api.delete('/logs', async (req, res) => {
+  console.log("Deleteing log")
+  console.log(req.body)
+  if(!req.body.uuid){
+    res.send({name : "missingProperties", message : "One or more property not set"});
+    return
+  }
+  let query = await _database._Logs.delete(req.body.uuid);
+  res.send({name : "success", message : "succsessfully deleted"});
+});
 
 
 
