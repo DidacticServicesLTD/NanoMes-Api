@@ -599,7 +599,7 @@ api.get('/orders/:uuid', async (req, res) => {
 
 /**
  * /orders
- * Add a new operation, or update an existing one
+ * Add a new order, or update an existing one
  * @type {post}
  * @access read, write
  * @returns {json} 
@@ -612,22 +612,28 @@ api.post('/orders', async (req, res) => {
     return
   }
 
-  // we could pass the wole product through, but for saftey, we re-retrieve it from the database
-  let product = await _database._Products.findOne({uuid : req.body.uuid})
 
-  console.log(product)
-  product.sequence.forEach(step => {
-    step.status = 0
-    step.uuid = uuidv4()
-  });
-  
-  console.log(product)
+  // if it doenst exist, create it
+  if(!req.body.hasOwnProperty("product_instance")){
+
+    req.body.product_instance = await _database._Products.findOne({uuid : req.body.uuid})
+    req.body.product_instance.sequence.forEach(step => {
+      step.status = 0
+      step.uuid = uuidv4()
+    });
+    
+  }
+
+  // if it isnt specified, create it at 0
+  if(!req.body.hasOwnProperty("status")){
+    req.body.status = 0
+  }
 
 
   var props = {
-    product_instance : product,
+    product_instance : req.body.product_instance,
     time : Date.now(),
-    status : 0
+    status : req.body.status
   }
   
 
