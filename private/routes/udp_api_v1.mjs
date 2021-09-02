@@ -207,7 +207,7 @@ if (msg_json.command == "logMessage") {
         order.product_instance.sequence.every(step =>{
           if(step.uuid == msg_json.step_uuid){
             step.status = msg_json.step_status
-            console.log("updating status of " + step.uuid + " to " + msg_json.step_status)
+            console.log("updating Step status of " + step.uuid + " to " + msg_json.step_status)
             return false
           }
           return true
@@ -218,19 +218,18 @@ if (msg_json.command == "logMessage") {
         // now we need to loop through, and check if all step status = 100.
         // if they do, we can update the order status to 100 too, to indaicate it is complete.
         // 
-        var all100 = true
-        order.product_instance.sequence.every(step =>{
-          if(step.status == 100){
-            return false
-          }else{
-            all100 = false;
-            return true
-          }
+      
+
+        var all100 = order.product_instance.sequence.every(step => {
+          console.log(step.uuid + ' : ' + step.status )
+          return parseInt(step.status) == 100
         })
+
         if(all100){
           order.status = 100;
+          console.log("updating Order status of " + order.uuid + " to " + order.status)
+          
         }
-
 
         await _database._Orders.save(order);
 
