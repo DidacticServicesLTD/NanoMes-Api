@@ -615,13 +615,14 @@ api.post('/orders', async (req, res) => {
 
   // if it doenst exist, create it
   if(!req.body.hasOwnProperty("product_instance")){
-
+    console.log("This is a new order - generate the prodct")
     req.body.product_instance = await _database._Products.findOne({uuid : req.body.uuid})
     req.body.product_instance.sequence.forEach(step => {
       step.status = 0
       step.uuid = uuidv4()
     });
-    
+  }else{
+    console.log("This is an update order")
   }
 
   // if it isnt specified, create it at 0
