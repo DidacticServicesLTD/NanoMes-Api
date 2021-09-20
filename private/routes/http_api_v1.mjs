@@ -647,7 +647,8 @@ api.post('/orders', async (req, res) => {
   }
   
 
-  await _database._Orders.save(props);
+  let result = await _database._Orders.save(props);
+  console.log(result)
   res.send({name : "success", message : "succsessfully updated or created", data : props});
 });
 
