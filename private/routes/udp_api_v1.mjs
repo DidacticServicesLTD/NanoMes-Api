@@ -207,6 +207,7 @@ if (msg_json.command == "logMessage") {
         order.product_instance.sequence.every(step =>{
           if(step.uuid == msg_json.step_uuid){
             step.status = msg_json.step_status
+            step.last_update_time = Date.now()
             console.log("updating Step status of " + step.uuid + " to " + msg_json.step_status)
             return false
           }
