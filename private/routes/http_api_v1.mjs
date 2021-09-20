@@ -637,6 +637,8 @@ api.post('/orders', async (req, res) => {
   }
 
 
+
+  console.log(_uuid)
   var props = {
     uuid : _uuid,
     product_instance : req.body.product_instance,
