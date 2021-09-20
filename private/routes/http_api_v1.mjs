@@ -596,7 +596,6 @@ api.get('/orders/:uuid', async (req, res) => {
 
 
 
-
 /**
  * /orders
  * Add a new order, or update an existing one
@@ -613,6 +612,9 @@ api.post('/orders', async (req, res) => {
   }
 
 
+  // uuid might be new or update
+  var _uuid = ""
+
   // if it doenst exist, create it
   if(!req.body.hasOwnProperty("product_instance")){
     console.log("This is a new order - generate the prodct")
@@ -621,6 +623,9 @@ api.post('/orders', async (req, res) => {
       step.status = 0
       step.uuid = uuidv4()
     });
+
+    // new uuid
+    _uuid = uuidv4()
   }else{
     console.log("This is an update order")
   }
@@ -628,11 +633,12 @@ api.post('/orders', async (req, res) => {
   // if it isnt specified, create it at 0
   if(!req.body.hasOwnProperty("status")){
     req.body.status = 0
+    _uuid = req.body.uuid
   }
 
 
   var props = {
-    uuid : req.body.uuid,
+    uuid : _uuid,
     product_instance : req.body.product_instance,
     time : Date.now(),
     status : req.body.status
