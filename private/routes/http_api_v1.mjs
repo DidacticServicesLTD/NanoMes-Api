@@ -628,12 +628,12 @@ api.post('/orders', async (req, res) => {
     _uuid = uuidv4()
   }else{
     console.log("This is an update order")
+    _uuid = req.body.uuid
   }
 
   // if it isnt specified, create it at 0
   if(!req.body.hasOwnProperty("status")){
     req.body.status = 0
-    _uuid = req.body.uuid
   }
 
 
