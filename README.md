@@ -8,6 +8,6 @@ HTTP
 UDP
 
 
-Copyright © 2021 Calum Knott
+Copyright © 2021 DSL
 - 
-You May Not : Use, Reproduce, Read, Compile or otherwise interact this code without permission from Calum Knott
+You May Not : Use, Reproduce, Read, Compile or otherwise interact this code without permission from Didactic Services LTD
